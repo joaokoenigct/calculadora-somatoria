@@ -1,0 +1,1178 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Calculadora Somatório</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  font-family: -apple-system, BlinkMacSystemFont,
+    "SF Pro Display", "SF Pro Text", "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-synthesis: none;
+  font-variant-numeric: tabular-nums;
+  color-scheme: light;
+
+  --bg: #f5f6f7;
+  --card: #ffffff;
+  --field: #f0f4f1;
+  --text: #172b27;
+  --muted: #72857b;
+  --border: #dce9e4;
+  --accent: #158653;
+  --accent-text: #176a49;
+  --selected-bg: #dcf5e6;
+  --selected-text: #116b43;
+  --result-bg: #f1f9f4;
+  --correct-bg: #d8f3e2;
+  --correct-text: #167446;
+  --wrong-bg: #ffe5e5;
+  --wrong-text: #ba3535;
+  --shadow: 0 2px 9px #00000012;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #000000;
+    --card: #161618;
+    --field: #252528;
+    --text: #ffffff;
+    --muted: #a1a1aa;
+    --border: #38383d;
+    --accent: #218b59;
+    --accent-text: #75e8ae;
+    --selected-bg: #173f30;
+    --selected-text: #75e8ae;
+    --result-bg: #1d2923;
+    --correct-bg: #204633;
+    --correct-text: #75e8ae;
+    --wrong-bg: #482729;
+    --wrong-text: #ff9b9b;
+    --shadow: 0 2px 10px #00000045;
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #000000;
+  --card: #161618;
+  --field: #252528;
+  --text: #ffffff;
+  --muted: #a1a1aa;
+  --border: #38383d;
+  --accent: #218b59;
+  --accent-text: #75e8ae;
+  --selected-bg: #173f30;
+  --selected-text: #75e8ae;
+  --result-bg: #1d2923;
+  --correct-bg: #204633;
+  --correct-text: #75e8ae;
+  --wrong-bg: #482729;
+  --wrong-text: #ff9b9b;
+  --shadow: 0 2px 10px #00000045;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 24px 14px;
+  background: var(--bg);
+  color: var(--text);
+  letter-spacing: -0.02em;
+  transition: background .25s, color .25s;
+}
+
+.app {
+  max-width: 1050px;
+  margin: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  min-width: 0;
+}
+
+.brand-icon {
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+  border-radius: 15px;
+  background: var(--selected-bg);
+  color: var(--accent-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.brand-icon svg {
+  width: 27px;
+  height: 27px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.heading {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.045em;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+h3 {
+  font-size: 19px;
+  font-weight: 750;
+  margin: 0;
+}
+
+button, input {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.panel {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 25px;
+  min-width: 0;
+  transition: background .25s, border-color .25s;
+}
+
+/* LAYOUT PRINCIPAL */
+
+.main-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 265px;
+  gap: 16px;
+  align-items: start;
+  margin-bottom: 16px;
+}
+
+.main-layout.visual-layout {
+  grid-template-columns: minmax(0, 760px);
+  justify-content: center;
+}
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dashboard-title {
+  font-size: 16px;
+  font-weight: 750;
+  margin-bottom: 4px;
+}
+
+.stat {
+  background: var(--field);
+  border-radius: 17px;
+  padding: 19px;
+}
+
+.stat strong {
+  display: block;
+  margin-top: 9px;
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--accent-text);
+}
+
+.progress {
+  height: 9px;
+  margin-top: 10px;
+  border-radius: 20px;
+  background: var(--field);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  transition: width .35s ease;
+}
+
+/* CHAVINHA DO TEMA */
+
+.theme-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 112px;
+  flex-shrink: 0;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 17px;
+  background: var(--field);
+  isolation: isolate;
+}
+
+.theme-thumb {
+  position: absolute;
+  z-index: 0;
+  top: 5px;
+  left: 5px;
+  width: calc((100% - 10px) / 2);
+  height: calc(100% - 10px);
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: var(--shadow);
+  transition: transform 280ms cubic-bezier(.2,.8,.2,1);
+}
+
+.theme-switch[data-selected="dark"] .theme-thumb {
+  transform: translateX(100%);
+}
+
+.theme-option {
+  position: relative;
+  z-index: 1;
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color .25s;
+}
+
+.theme-option.active {
+  color: var(--accent-text);
+}
+
+.theme-option svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* CHAVINHA DOS MODOS */
+
+.mode-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 5px;
+  background: var(--field);
+  border-radius: 16px;
+  margin-bottom: 24px;
+  isolation: isolate;
+}
+
+.mode-thumb {
+  position: absolute;
+  z-index: 0;
+  top: 5px;
+  left: 5px;
+  width: calc((100% - 10px) / 2);
+  height: calc(100% - 10px);
+  background: var(--card);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  transition: transform 280ms cubic-bezier(.2,.8,.2,1);
+}
+
+.mode-switch[data-selected="correct"] .mode-thumb {
+  transform: translateX(100%);
+}
+
+.mode-button {
+  position: relative;
+  z-index: 1;
+  border: 0;
+  border-radius: 12px;
+  padding: 14px 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 700;
+  transition: color .25s;
+}
+
+.mode-button.active {
+  color: var(--accent-text);
+}
+
+/* FORMULÁRIO */
+
+label {
+  display: block;
+  margin: 20px 0 9px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.choices {
+  display: flex;
+  gap: 8px;
+}
+
+.choice {
+  flex: 1;
+  min-width: 0;
+  padding: 13px 5px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--field);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 700;
+  transition: background .2s, border-color .2s;
+}
+
+.choice.active {
+  background: var(--selected-bg);
+  border-color: var(--accent);
+  color: var(--selected-text);
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.fields.visual-mode {
+  grid-template-columns: 1fr;
+}
+
+input {
+  width: 100%;
+  padding: 15px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--field);
+  color: var(--text);
+  font-size: 19px;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--accent);
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+.primary {
+  width: 100%;
+  margin-top: 22px;
+  padding: 16px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform .15s;
+}
+
+.primary:active {
+  transform: scale(.99);
+}
+
+.secondary {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--field);
+  color: var(--text);
+  font-size: 12px;
+}
+
+/* RESULTADOS */
+
+.result {
+  margin-top: 20px;
+  padding: 19px;
+  border-radius: 18px;
+  background: var(--result-bg);
+  animation: appear .25s ease;
+}
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.result-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+.score {
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--accent-text);
+}
+
+.chips {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 15px;
+}
+
+.chip {
+  flex: 1;
+  min-width: 40px;
+  padding: 12px 5px;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.correct {
+  background: var(--correct-bg);
+  color: var(--correct-text);
+}
+
+.wrong {
+  background: var(--wrong-bg);
+  color: var(--wrong-text);
+}
+
+.neutral {
+  background: var(--field);
+  color: var(--muted);
+}
+
+/* HISTÓRICO */
+
+.history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+
+.history-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error {
+  color: var(--wrong-text);
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 700px) {
+  .main-layout,
+  .main-layout.visual-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 500px) {
+  body {
+    padding: 18px 10px;
+  }
+
+  .panel {
+    padding: 18px;
+  }
+
+  .brand {
+    gap: 9px;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+  }
+
+  .brand-icon svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .heading {
+    font-size: 21px;
+  }
+
+  .mode-button {
+    font-size: 12px;
+  }
+
+  .theme-switch {
+    width: 100px;
+  }
+
+  .history-row {
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+  <!-- CABEÇALHO COM ÍCONE DE CALCULADORA -->
+
+  <div class="header">
+    <div class="brand">
+
+      <div class="brand-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <rect x="5" y="2.5" width="14" height="19"
+                rx="3"></rect>
+          <rect x="8" y="6" width="8" height="4"
+                rx="0.8"></rect>
+          <path d="M8.5 14h1M14.5 14h1M8.5 18h1M14.5 18h1"></path>
+        </svg>
+      </div>
+
+      <div>
+        <div class="heading">Calculadora Somatório</div>
+        <div class="muted">
+          Calculadora de questões · Modelo UFSC
+        </div>
+      </div>
+
+    </div>
+
+    <div class="theme-switch"
+         data-selected="light"
+         role="group"
+         aria-label="Aparência">
+
+      <div class="theme-thumb"></div>
+
+      <button class="theme-option"
+              data-theme-choice="light"
+              aria-label="Modo claro">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="4"></circle>
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42"></path>
+        </svg>
+      </button>
+
+      <button class="theme-option"
+              data-theme-choice="dark"
+              aria-label="Modo escuro">
+        <svg viewBox="0 0 24 24">
+          <path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5 8.5 8.5 0 1 0 20.5 14.5Z"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- FORMULÁRIO E PAINEL LATERAL -->
+
+  <div class="main-layout visual-layout" id="main-layout">
+
+    <div class="panel">
+
+      <div class="mode-switch"
+           data-selected="visual"
+           role="group"
+           aria-label="Modo da calculadora">
+
+        <div class="mode-thumb"></div>
+
+        <button class="mode-button active"
+                data-mode="visual">
+          Visualizar proposições
+        </button>
+
+        <button class="mode-button"
+                data-mode="correct">
+          Corrigir questão
+        </button>
+      </div>
+
+      <h3 id="section-title">Visualizar proposições</h3>
+
+      <label>Até qual proposição a questão possui?</label>
+
+      <div class="choices">
+        <button class="choice" data-last="4">04</button>
+        <button class="choice" data-last="8">08</button>
+        <button class="choice active" data-last="16">16</button>
+        <button class="choice" data-last="32">32</button>
+        <button class="choice" data-last="64">64</button>
+      </div>
+
+      <div class="fields visual-mode" id="input-fields">
+
+        <div>
+          <label for="student">Sua somatória</label>
+          <input id="student"
+                 type="number"
+                 min="0"
+                 placeholder="Ex.: 23">
+        </div>
+
+        <div id="official-field" class="hidden">
+          <label for="official">Gabarito oficial</label>
+          <input id="official"
+                 type="number"
+                 min="0"
+                 placeholder="Ex.: 19">
+        </div>
+
+      </div>
+
+      <div id="error-message" class="error"></div>
+
+      <button class="primary" id="calculate">
+        Visualizar proposições
+      </button>
+
+      <div id="result-area"></div>
+
+    </div>
+
+    <!-- ESTATÍSTICAS: APENAS NO MODO CORRIGIR -->
+
+    <div class="panel dashboard hidden" id="dashboard">
+
+      <div class="dashboard-title">Seu desempenho</div>
+
+      <div class="stat">
+        <span class="muted">Questões corrigidas</span>
+        <strong id="total-q">0</strong>
+      </div>
+
+      <div class="stat">
+        <span class="muted">Aproveitamento</span>
+        <strong id="percent">0%</strong>
+      </div>
+
+      <div class="stat">
+        <span class="muted">Nota GAIA</span>
+        <strong id="gaia-grade">—</strong>
+      </div>
+
+      <div>
+        <div class="progress">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <p class="muted" id="total-points">
+          0,00 de 0 pontos
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- HISTÓRICO -->
+
+  <div class="panel hidden" id="history-panel">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <h3>Histórico de correções</h3>
+      <button class="secondary" id="reset">
+        ↻ Reiniciar
+      </button>
+    </div>
+
+    <div id="history"></div>
+
+    <p class="muted">
+      Correção estimada: cada proposição marcada ou
+      desmarcada corretamente vale uma fração do ponto.
+    </p>
+
+  </div>
+
+</div>
+
+<script>
+(() => {
+
+  const el = id => document.getElementById(id);
+  const fmt = n => n.toFixed(2).replace(".", ",");
+  const pad = n => String(n).padStart(2, "0");
+
+  let ultima = 16;
+  let modo = "visual";
+  let questoes = [];
+
+  // TEMA CLARO E ESCURO
+
+  const systemTheme = window.matchMedia(
+    "(prefers-color-scheme: dark)"
+  );
+
+  let manualTheme = null;
+
+  function isDark() {
+    return manualTheme
+      ? manualTheme === "dark"
+      : systemTheme.matches;
+  }
+
+  function applyTheme() {
+    const selected = isDark() ? "dark" : "light";
+
+    if (manualTheme) {
+      document.documentElement.dataset.theme = manualTheme;
+    } else {
+      document.documentElement.removeAttribute("data-theme");
+    }
+
+    document.querySelector(".theme-switch")
+      .dataset.selected = selected;
+
+    document.querySelectorAll(".theme-option").forEach(btn => {
+      const active = btn.dataset.themeChoice === selected;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", String(active));
+    });
+  }
+
+  document.querySelectorAll(".theme-option").forEach(btn => {
+    btn.onclick = () => {
+      manualTheme = btn.dataset.themeChoice;
+      applyTheme();
+    };
+  });
+
+  if (systemTheme.addEventListener) {
+    systemTheme.addEventListener("change", () => {
+      if (!manualTheme) applyTheme();
+    });
+  }
+
+  applyTheme();
+
+  // CARREGAR HISTÓRICO
+
+  try {
+    const salvo = JSON.parse(
+      localStorage.getItem("somatorio-gaia-questoes")
+    );
+
+    if (Array.isArray(salvo)) {
+      questoes = salvo.filter(q =>
+        Number.isFinite(q.aluno) &&
+        Number.isFinite(q.gabarito) &&
+        Number.isFinite(q.nota) &&
+        Number.isFinite(q.original)
+      );
+    }
+  } catch(e) {}
+
+  function salvar() {
+    try {
+      localStorage.setItem(
+        "somatorio-gaia-questoes",
+        JSON.stringify(questoes)
+      );
+    } catch(e) {}
+  }
+
+  // ALTERNAR MODOS
+
+  function atualizarModo() {
+    const corrigindo = modo === "correct";
+
+    document.querySelector(".mode-switch")
+      .dataset.selected = modo;
+
+    document.querySelectorAll(".mode-button").forEach(btn => {
+      const active = btn.dataset.mode === modo;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", String(active));
+    });
+
+    el("dashboard").classList.toggle(
+      "hidden", !corrigindo
+    );
+
+    el("history-panel").classList.toggle(
+      "hidden", !corrigindo
+    );
+
+    el("main-layout").classList.toggle(
+      "visual-layout", !corrigindo
+    );
+
+    el("official-field").classList.toggle(
+      "hidden", !corrigindo
+    );
+
+    el("input-fields").classList.toggle(
+      "visual-mode", !corrigindo
+    );
+
+    el("section-title").textContent = corrigindo
+      ? "Corrigir questão"
+      : "Visualizar proposições";
+
+    el("calculate").textContent = corrigindo
+      ? "＋ Corrigir e adicionar questão"
+      : "Visualizar proposições";
+
+    el("result-area").innerHTML = "";
+    el("error-message").textContent = "";
+  }
+
+  document.querySelectorAll(".mode-button").forEach(btn => {
+    btn.onclick = () => {
+      modo = btn.dataset.mode;
+      atualizarModo();
+    };
+  });
+
+  // ESCOLHER ÚLTIMA PROPOSIÇÃO
+
+  document.querySelectorAll(".choice").forEach(btn => {
+    btn.onclick = () => {
+      ultima = Number(btn.dataset.last);
+
+      document.querySelectorAll(".choice").forEach(b =>
+        b.classList.remove("active")
+      );
+
+      btn.classList.add("active");
+
+      el("result-area").innerHTML = "";
+      el("error-message").textContent = "";
+    };
+  });
+
+  // NOTA GAIA
+
+  function notaGaia(p) {
+    if (p >= 80) return "10,0";
+    if (p >= 70) return "9,0";
+    if (p >= 60) return "8,0";
+    if (p >= 50) return "7,0";
+    if (p >= 40) return "6,0";
+    return "5,0";
+  }
+
+  // DASHBOARD E HISTÓRICO
+
+  function atualizar() {
+    const total = questoes.reduce(
+      (s, q) => s + q.nota, 0
+    );
+
+    const p = questoes.length
+      ? total / questoes.length * 100
+      : 0;
+
+    el("total-q").textContent = questoes.length;
+    el("percent").textContent = fmt(p) + "%";
+
+    el("gaia-grade").textContent =
+      questoes.length ? notaGaia(p) : "—";
+
+    el("total-points").textContent =
+      fmt(total) + " de " + questoes.length + " pontos";
+
+    el("progress-fill").style.width = p + "%";
+
+    const history = el("history");
+    history.innerHTML = "";
+
+    if (!questoes.length) {
+      history.innerHTML =
+        '<p class="muted">Nenhuma questão corrigida ainda.</p>';
+      salvar();
+      return;
+    }
+
+    questoes.forEach((q, i) => {
+      const row = document.createElement("div");
+      row.className = "history-row";
+
+      const info = document.createElement("div");
+      const title = document.createElement("b");
+      title.textContent = "Questão " + pad(i + 1);
+
+      const details = document.createElement("div");
+      details.className = "muted";
+      details.textContent =
+        "Sua: " + q.aluno +
+        " • Oficial: " + q.gabarito;
+
+      info.append(title, details);
+
+      const actions = document.createElement("div");
+      actions.className = "history-actions";
+
+      const score = document.createElement("b");
+      score.textContent = fmt(q.nota);
+
+      const annul = document.createElement("button");
+      annul.className = "secondary";
+      annul.textContent = q.anulada
+        ? "Desanular" : "Anular";
+
+      annul.onclick = () => {
+        q.anulada = !q.anulada;
+        q.nota = q.anulada ? 1 : q.original;
+        atualizar();
+      };
+
+      const remove = document.createElement("button");
+      remove.className = "secondary";
+      remove.textContent = "×";
+      remove.title = "Excluir questão";
+
+      remove.onclick = () => {
+        questoes.splice(i, 1);
+        atualizar();
+      };
+
+      actions.append(score, annul, remove);
+      row.append(info, actions);
+      history.appendChild(row);
+    });
+
+    salvar();
+  }
+
+  // RESULTADO
+
+  function mostrarResultado(valores, aluno, gabarito) {
+    const corrigindo = modo === "correct";
+    const area = el("result-area");
+    area.innerHTML = "";
+
+    const box = document.createElement("div");
+    box.className = "result";
+
+    const top = document.createElement("div");
+    top.className = "result-top";
+
+    const title = document.createElement("b");
+    title.textContent = corrigindo
+      ? "Resultado da questão"
+      : "Proposições assinaladas";
+
+    top.appendChild(title);
+
+    let nota = null;
+
+    if (corrigindo) {
+      const erros = valores.filter(v =>
+        ((aluno & v) !== 0) !== ((gabarito & v) !== 0)
+      );
+
+      nota = (valores.length - erros.length)
+        / valores.length;
+
+      const score = document.createElement("span");
+      score.className = "score";
+      score.textContent = fmt(nota) + " / 1,00";
+      top.appendChild(score);
+    }
+
+    box.appendChild(top);
+
+    const chips = document.createElement("div");
+    chips.className = "chips";
+
+    valores.forEach(v => {
+      const marcado = (aluno & v) !== 0;
+      const chip = document.createElement("div");
+
+      if (corrigindo) {
+        const correto =
+          marcado === ((gabarito & v) !== 0);
+
+        chip.className =
+          "chip " + (correto ? "correct" : "wrong");
+
+        chip.textContent =
+          pad(v) + (correto ? " ✓" : " ×");
+      } else {
+        chip.className =
+          "chip " + (marcado ? "correct" : "neutral");
+
+        chip.textContent =
+          pad(v) + (marcado ? " ✓" : " —");
+      }
+
+      chips.appendChild(chip);
+    });
+
+    box.appendChild(chips);
+
+    const legenda = document.createElement("p");
+    legenda.className = "muted";
+
+    if (corrigindo) {
+      legenda.textContent =
+        "Verde: proposição acertada. " +
+        "Vermelho: proposição errada.";
+    } else {
+      const marcadas = valores.filter(v =>
+        (aluno & v) !== 0
+      );
+
+      legenda.textContent = marcadas.length
+        ? "Assinaladas: " + marcadas.map(pad).join(" + ")
+        : "Nenhuma proposição assinalada.";
+    }
+
+    box.appendChild(legenda);
+    area.appendChild(box);
+
+    return nota;
+  }
+
+  // CALCULAR
+
+  function executar() {
+    const aText = el("student").value.trim();
+    const gText = el("official").value.trim();
+
+    const aluno = Number(aText);
+    const gabarito = Number(gText);
+
+    const quantidade = Math.log2(ultima) + 1;
+    const limite = 2 ** quantidade - 1;
+
+    el("error-message").textContent = "";
+
+    const alunoInvalido =
+      !aText ||
+      !Number.isInteger(aluno) ||
+      aluno < 0 ||
+      aluno > limite;
+
+    const gabaritoInvalido =
+      modo === "correct" &&
+      (!gText ||
+       !Number.isInteger(gabarito) ||
+       gabarito < 0 ||
+       gabarito > limite);
+
+    if (alunoInvalido || gabaritoInvalido) {
+      el("error-message").textContent =
+        "Insira somatórias inteiras entre 0 e " +
+        limite + ".";
+      return;
+    }
+
+    const valores = Array.from(
+      { length: quantidade },
+      (_, i) => 2 ** i
+    );
+
+    const nota = mostrarResultado(
+      valores, aluno, gabarito
+    );
+
+    if (modo === "correct") {
+      questoes.push({
+        aluno,
+        gabarito,
+        nota,
+        original: nota,
+        anulada: false
+      });
+
+      atualizar();
+
+      el("official").value = "";
+      el("student").value = "";
+    }
+
+    el("student").focus();
+  }
+
+  el("calculate").onclick = executar;
+
+  el("student").onkeydown = e => {
+    if (e.key === "Enter") executar();
+  };
+
+  el("official").onkeydown = e => {
+    if (e.key === "Enter") executar();
+  };
+
+  el("reset").onclick = () => {
+    if (confirm("Apagar todas as questões corrigidas?")) {
+      questoes = [];
+      el("result-area").innerHTML = "";
+      atualizar();
+    }
+  };
+
+  atualizarModo();
+  atualizar();
+
+})();
+</script>
+</body>
+</html>
